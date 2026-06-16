@@ -1,5 +1,8 @@
 import { Router } from "express";
 import wineStyleRoutes from "../modules/wine-styles/wine-style.routes.js";
+import grapeRoutes from "../modules/grapes/grape.routes.js";
+import countryRoutes from "../modules/countries/country.routes.js";
+import wineRoutes from "../modules/wines/wine.routes.js";
 
 const router = Router();
 
@@ -10,5 +13,8 @@ router.get("/", (req, res) => {
 });
 
 router.use("/wine-styles", wineStyleRoutes);
+router.use("/grapes", grapeRoutes);
+router.use("/countries", countryRoutes);
+router.use("/wines", wineRoutes);
 
 export default router;
