@@ -1,0 +1,32 @@
+# Dependências
+node_modules/
+
+# Ambiente
+.env
+.env.local
+
+# Build
+dist/
+build/
+
+# Logs
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Uploads
+backend/uploads/
+
+# Cobertura
+coverage/
+
+# Banco local
+*.sqlite
+*.db
