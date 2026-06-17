@@ -3,6 +3,9 @@ import wineStyleRoutes from "../modules/wine-styles/wine-style.routes.js";
 import grapeRoutes from "../modules/grapes/grape.routes.js";
 import countryRoutes from "../modules/countries/country.routes.js";
 import wineRoutes from "../modules/wines/wine.routes.js";
+import restaurantRoutes from "../modules/restaurants/restaurant.routes.js";
+import wineListRoutes from "../modules/wine-lists/wine-list.routes.js";
+import wineListItemRoutes from "../modules/wine-list-item/wine-list-item.routes.js";
 
 const router = Router();
 
@@ -16,5 +19,8 @@ router.use("/wine-styles", wineStyleRoutes);
 router.use("/grapes", grapeRoutes);
 router.use("/countries", countryRoutes);
 router.use("/wines", wineRoutes);
+router.use("/restaurants", restaurantRoutes);
+router.use("/wine-lists", wineListRoutes);
+router.use("/wine-list-items", wineListItemRoutes);
 
 export default router;
