@@ -1,4 +1,5 @@
 import { z } from "zod";
+import QRCode from "qrcode";
 import { createSlug } from "../../shared/utils/create-slug.js";
 import * as repository from "./restaurant.repository.js";
 
@@ -10,6 +11,31 @@ const restaurantSchema = z.object({
   address: z.string().optional().nullable(),
   phone: z.string().max(30).optional().nullable(),
 });
+
+function normalizeBaseUrl(url) {
+  return String(url || "").replace(/\/+$/, "");
+}
+
+function getPublicAppBaseUrl(req) {
+  const configuredUrl =
+    process.env.FRONTEND_URL ||
+    process.env.PUBLIC_APP_URL ||
+    process.env.FRONTEND_PUBLIC_URL;
+
+  if (configuredUrl) {
+    return normalizeBaseUrl(configuredUrl);
+  }
+
+  if (process.env.NODE_ENV !== "production") {
+    return "http://localhost:5173";
+  }
+
+  return normalizeBaseUrl(`${req.protocol}://${req.get("host")}`);
+}
+
+function buildRestaurantPublicUrl(slug, req) {
+  return `${getPublicAppBaseUrl(req)}/r/${slug}`;
+}
 
 function createHttpError(message, statusCode) {
   const error = new Error(message);
@@ -89,5 +115,34 @@ export async function deleteRestaurant(id) {
 
   return {
     deleted: true,
+  };
+}
+
+export async function generateRestaurantQRCode(id, req) {
+  const restaurant = await getRestaurantById(id);
+  const publicPath = `/r/${restaurant.slug}`;
+  const publicUrl = buildRestaurantPublicUrl(restaurant.slug, req);
+
+  const svg = await QRCode.toString(publicUrl, {
+    type: "svg",
+    errorCorrectionLevel: "H",
+    margin: 2,
+    width: 360,
+    color: {
+      dark: "#181818",
+      light: "#ffffff",
+    },
+  });
+
+  return {
+    restaurant: {
+      id: restaurant.id,
+      name: restaurant.name,
+      slug: restaurant.slug,
+      active: restaurant.active,
+    },
+    public_path: publicPath,
+    public_url: publicUrl,
+    svg,
   };
 }

@@ -13,7 +13,8 @@ const schema = z.object({
 
   available: z.boolean().default(true),
   featured: z.boolean().default(false),
-  display_order: z.coerce.number().int().min(0).default(0),
+  // 0 ou ausência = posição automática no final da carta
+  display_order: z.coerce.number().int().min(0).optional().default(0),
 });
 
 const updateSchema = z.object({
@@ -22,7 +23,7 @@ const updateSchema = z.object({
   currency: z.string().length(3).default("BRL"),
   available: z.boolean().default(true),
   featured: z.boolean().default(false),
-  display_order: z.coerce.number().int().min(0).default(0),
+  display_order: z.coerce.number().int().min(0).optional(),
 });
 
 export async function listWineListItems(query) {
@@ -68,6 +69,10 @@ export async function createWineListItem(payload) {
   if (data.bottle_price == null && data.glass_price == null) {
     throw createHttpError("Informe preço da garrafa, da taça ou ambos.", 400);
   }
+
+  // Na criação, a ordem é sempre automática: entra no final da carta.
+  // A alteração manual da ordem fica para uma futura ação de reordenar.
+  data.display_order = await repository.getNextDisplayOrder(data.wine_list_id);
 
   return repository.create(data);
 }

@@ -97,6 +97,19 @@ export async function findDuplicate(wineListId, wineId) {
   return rows[0];
 }
 
+export async function getNextDisplayOrder(wineListId) {
+  const [rows] = await db.query(
+    `
+    SELECT COALESCE(MAX(display_order), 0) + 1 AS next_order
+    FROM wine_list_items
+    WHERE wine_list_id = ?
+    `,
+    [wineListId],
+  );
+
+  return rows[0]?.next_order || 1;
+}
+
 export async function create(data) {
   const [result] = await db.query(
     `

@@ -1,34 +1,46 @@
 import multer from "multer";
 import path from "path";
 import crypto from "crypto";
+import fs from "fs";
 
-const storage = multer.diskStorage({
-  destination: (req, file, callback) => {
-    callback(null, "uploads/");
-  },
+function ensureDirExists(dir) {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+}
 
-  filename: (req, file, callback) => {
-    const hash = crypto.randomBytes(16).toString("hex");
-    const ext = path.extname(file.originalname);
+function createStorage(folder) {
+  return multer.diskStorage({
+    destination: (req, file, callback) => {
+      ensureDirExists(folder);
+      callback(null, folder);
+    },
 
-    callback(null, `${hash}${ext}`);
-  },
-});
+    filename: (req, file, callback) => {
+      const hash = crypto.randomBytes(16).toString("hex");
+      const ext = path.extname(file.originalname).toLowerCase();
 
-export const upload = multer({
-  storage,
+      callback(null, `${hash}${ext}`);
+    },
+  });
+}
 
-  limits: {
-    fileSize: 5 * 1024 * 1024,
-  },
+function imageFilter(req, file, callback) {
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
-  fileFilter: (req, file, callback) => {
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+  if (!allowedTypes.includes(file.mimetype)) {
+    return callback(new Error("Formato de imagem não permitido."));
+  }
 
-    if (!allowedTypes.includes(file.mimetype)) {
-      return callback(new Error("Formato de imagem não permitido."));
-    }
+  callback(null, true);
+}
 
-    callback(null, true);
-  },
-});
+export function createUpload(folder) {
+  return multer({
+    storage: createStorage(folder),
+    limits: {
+      fileSize: Number(process.env.MAX_FILE_SIZE_MB || 5) * 1024 * 1024,
+    },
+    fileFilter: imageFilter,
+  });
+}

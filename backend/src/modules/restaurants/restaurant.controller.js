@@ -43,3 +43,10 @@ export const destroy = asyncHandler(async (req, res) => {
 
   return res.json(successResponse(data, "Restaurante removido com sucesso."));
 });
+
+
+export const qrcode = asyncHandler(async (req, res) => {
+  const data = await service.generateRestaurantQRCode(req.params.id, req);
+
+  return res.json(successResponse(data));
+});
